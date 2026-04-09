@@ -135,11 +135,9 @@ const translations = {
 
 window.currentLang = 'uz';
 
-const _isLocal = window.location.hostname === 'localhost' ||
-                  window.location.hostname === '127.0.0.1' ||
-                  window.location.protocol === 'file:';
-// Vercel'da relative /api, local dev'da localhost:8000/api
-const apiUrlBase = _isLocal ? 'http://localhost:8000/api' : '/api';
+// Vercel'da va local server'da (uvicorn) relative /api ishlatamiz.
+// Faqat index.html faylini to'g'ridan-to'g'ri (file://) ochgandagina localhost:8000 kerak bo'ladi.
+const apiUrlBase = window.location.protocol === 'file:' ? 'http://localhost:8000/api' : '/api';
 
 let patientsDB = [];
 let appSettings = {doctor_name: "Dr. Alisher V.", specialty: "Ortoped-Travmatolog", theme: "dark", lang: "uz", avatar: ""};
@@ -485,13 +483,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             formData.append('file', file);
 
             try {
-                // Local server: localhost:8000, Vercel: relative /api/predict
-                const isLocal = window.location.hostname === 'localhost' || 
-                                window.location.hostname === '127.0.0.1' || 
-                                window.location.protocol === 'file:';
-                const apiUrl = isLocal 
-                    ? 'http://localhost:8000/api/predict' 
-                    : '/api/predict';
+                const apiUrl = `${apiUrlBase}/predict`;
 
                 const response = await fetch(apiUrl, {
                     method: 'POST',
