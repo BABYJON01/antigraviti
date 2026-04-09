@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docassist | Tizza Bo'g'imi Tahlili</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=10">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-bone"></i>
+                <h2>Docassist</h2>
+                <span class="badge">Ekspert Tizim</span>
+            </div>
+            
+            <div class="patient-profile">
+                <div class="avatar" style="cursor: pointer; position: relative;" id="doctorAvatarContainer" title="Rasmni o'zgartirish">
+                    <img id="doctorAvatarImg" src="https://i.pravatar.cc/150?img=32" alt="Shifokor">
+                    <div class="status-dot"></div>
+                    <div style="position: absolute; top:0; left:0; right:0; bottom:0; border-radius: 50%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; color: white;" id="avatarOverlay">
+                        <i class="fa-solid fa-camera"></i>
+                    </div>
+                </div>
+                <input type="file" id="doctorAvatarInput" accept="image/*" style="display: none;">
+                <h3 id="docNameDisplay" style="display: flex; align-items: center; justify-content: center; gap: 8px;">Dr. Alisher V.</h3>
+                <p id="docSpecialtyDisplay" style="margin-bottom: 12px; font-size: 14px; color: var(--text-muted);">Ortoped-Travmatolog</p>
+                <div class="bmi-badge success" data-i18n="personalCabinet" style="padding: 6px 16px; border-radius: 20px;">Shaxsiy Kabinet</div>
+            </div>
+
+            <nav class="menu">
+                <a href="#" class="active" data-i18n="newAnalysis"><i class="fa-solid fa-chart-pie"></i> Yangi Tahlil</a>
+                <a href="#" id="openDatabaseBtn" data-i18n="database"><i class="fa-solid fa-users"></i> Bemorlar Bazasi</a>
+                <a href="#" id="openSettingsBtn" data-i18n="settings"><i class="fa-solid fa-gear"></i> Sozlamalar</a>
+            </nav>
+
+            <div class="platform-stats" style="margin-top: 24px; padding: 16px; background-color: var(--card-bg); border-radius: 12px; border: 1px solid var(--border);">
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;" data-i18n="totalPatients">Barcha xizmat ko'rsatilganlar</p>
+                <h2 style="font-size: 28px; color: var(--primary); display: flex; align-items: center; gap: 10px;">
+                    <i class="fa-solid fa-user-group"></i> <span id="totalPatientsCount">0</span>
+                </h2>
+            </div>
+
+
+            <div class="auth-status">
+                <i class="fa-solid fa-shield-halved"></i>
+                <div>
+                    <h4>Xavfsiz ulanish</h4>
+                    <p>2FA orqali tasdiqlangan</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header>
+                <div class="header-title">
+                    <h1 data-i18n="resultsTitle">Tahlil Natijalari</h1>
+                    <p data-i18n="resultsSubtitle">Sun'iy intellekt (Fuzzy Logic) va tasvir diagnostikasi asosida</p>
+                </div>
+                <div class="actions">
+                    <button id="downloadPdfBtn" class="btn secondary" data-i18n="pdfBtn"><i class="fa-solid fa-download"></i> PDF shaklida yuklab olish</button>
+                    <button class="btn primary" data-i18n="shareBtn"><i class="fa-solid fa-share-nodes"></i> Yuborish</button>
+                </div>
+            </header>
+
+            <div class="content-grid">
+                <!-- Upload X-Ray Card -->
+                <div class="card upload-card full-width" style="border-left: 4px solid var(--primary);">
+                    <div class="card-body">
+                        <h3 data-i18n="uploadTitle"><i class="fa-solid fa-user-plus"></i> Yangi Bemor Ma'lumotlari</h3>
+                        <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 14px;" data-i18n="uploadDesc">Bemor ro'yxatga olish va MRT/Rentgen tasvirini yuklash orqali tahlilni boshlang.</p>
+                        
+                        <div class="patient-form" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; text-align: left;">
+                            <div class="form-group">
+                                <label data-i18n="firstName">Ism:</label>
+                                <input type="text" id="patientFirstName" class="form-control" placeholder="Bemor ismi">
+                            </div>
+                            <div class="form-group">
+                                <label data-i18n="lastName">Familiya:</label>
+                                <input type="text" id="patientLastName" class="form-control" placeholder="Bemor familiyasi">
+                            </div>
+                            <div class="form-group">
+                                <label data-i18n="age">Yoshi:</label>
+                                <input type="number" id="patientAgeInput" class="form-control" value="54">
+                            </div>
+                            <div class="form-group">
+                                <label data-i18n="bmiTitle">BMI (Tana vazni indeksi):</label>
+                                <input type="number" step="0.1" id="patientBmiInput" class="form-control" value="32.4">
+                            </div>
+                        </div>
+
+                        <div style="text-align: center; padding: 20px; border: 2px dashed var(--border); border-radius: 8px;">
+                            <i class="fa-solid fa-cloud-arrow-up" style="font-size: 32px; color: var(--primary); margin-bottom: 12px;"></i>
+                            <input type="file" id="xrayUpload" accept="image/*" style="display: none;">
+                            <button class="btn primary" style="margin: 0 auto;" onclick="document.getElementById('xrayUpload').click()" data-i18n="chooseImage">
+                                <i class="fa-solid fa-camera"></i> Tasvir Tanlash
+                            </button>
+                            <div id="uploadResult" style="margin-top: 20px; font-size: 15px; font-weight: 500;"></div>
+                            <img id="imagePreview" style="max-width: 100%; max-height: 250px; margin: 20px auto 0; border-radius: 8px; box-shadow: var(--shadow-md); display: none;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Diagnostik Xulosa Card -->
+                <div class="card diagnosis-card full-width">
+                    <div class="card-header">
+                        <i class="fa-solid fa-stethoscope"></i>
+                        <h3 data-i18n="analysisResult">Diagnostik Xulosa</h3>
+                        <span class="severity" data-i18n="pending">Kutilyapti...</span>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Kellgren-Lawrence:</strong> <span id="klGradeText" data-i18n="pending">Natija kutilmoqda</span></p>
+                        <p class="description"><strong data-i18n="systemConclusion">Tizim xulosasi:</strong> <span data-i18n="pendingAnalysisText">Tahlilni boshlash uchun avval tepadan tasvir yuklang.</span></p>
+                        
+                        <div class="clinical-analysis">
+                            <h4><i class="fa-solid fa-brain"></i> <span data-i18n="fuzzyLogicTitle">AI Klinik Tahlili (Fuzzy Logic)</span></h4>
+                            <p data-i18n="fuzzyLogicPending">Bemorning parametrlari bo'yicha batafsil xulosa tayyorlanmoqda...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dynamics Chart -->
+                <div class="card chart-card">
+                    <div class="card-header">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <h3 data-i18n="chartTitle">Bo'g'im Tirqishi Dinamikasi</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="dynamicsChart"></canvas>
+                        </div>
+                        <div class="trend-indicator" style="background-color: var(--primary-light); color: var(--text-muted);">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                            <span>Grafig ishlashi uchun avval tahlilni yakunlang.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Treatment & Activity -->
+                <div class="card recommendation-card">
+                    <div class="card-header">
+                        <i class="fa-solid fa-notes-medical"></i>
+                        <h3 data-i18n="recomTitle">Tavsiya va Rejim</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="treatment-section">
+                            <h4>Davo Rejasi</h4>
+                            <ul>
+                                <li style="color: var(--text-muted);" id="tempRecomMsg">Tasvir tahlili tugagandan so'ng aniq davo rejasi shakllantiriladi.</li>
+                            </ul>
+                        </div>
+                        <div class="activity-section">
+                            <div class="activity allowed">
+                                <h5 data-i18n="allowed"><i class="fa-solid fa-check-circle"></i> Mumkin</h5>
+                                <p>...</p>
+                            </div>
+                            <div class="activity forbidden">
+                                <h5 data-i18n="forbidden"><i class="fa-solid fa-ban"></i> Taqiqlangan</h5>
+                                <p>...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Doctor's Note -->
+                <div class="card doctor-note full-width">
+                    <div class="card-header">
+                        <i class="fa-solid fa-user-md"></i>
+                        <h3 data-i18n="docNote">Mutaxassis uchun Eslatma</h3>
+                    </div>
+                    <div class="card-body">
+                        <code id="doctorNoteText">
+                            Doktor xulosasi: Tizimli tahlil natijasini kutish rejimiga o'tildi...
+                        </code>
+                    </div>
+                </div>
+
+            </div>
+
+            <footer class="disclaimer">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <p><strong>Ogohlantirish:</strong> Ushbu tizim AI va tasvirni tahlil qilish asosida ishlovchi yordamchi diagnostika vositasidir. Yakuniy tashxis va davo choralari vakolatli shifokor tomonidan tasdiqlanishi shart.</p>
+            </footer>
+
+            <!-- Site Footer Customized for Docassist -->
+            <footer class="site-footer">
+                <div class="footer-content">
+                    <div class="footer-branding">
+                        <div class="logo">
+                            <i class="fa-solid fa-bone"></i>
+                            <h2 style="color: white">Docassist</h2>
+                        </div>
+                        <p class="footer-description">
+                            Sun'iy intellekt va tasvir diagnostikasi asosida tizza bo'g'imi tahlili uchun eng ishonchli platforma. Shifokorlar uchun professional yordamchi vosita.
+                        </p>
+                        <div class="social-links">
+                            <a href="#" class="social-link telegram" title="Telegram"><i class="fa-brands fa-telegram"></i></a>
+                            <a href="#" class="social-link instagram" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                            <a href="#" class="social-link facebook" title="Facebook"><i class="fa-brands fa-facebook"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="footer-links-column">
+                        <h4 data-i18n="footerServices">Xizmatlar</h4>
+                        <ul class="footer-links">
+                            <li><a href="#"><i class="fa-solid fa-notes-medical"></i> Kel-Law Tahlili</a></li>
+                            <li><a href="#"><i class="fa-solid fa-user-doctor"></i> Ekspert Maslahati</a></li>
+                            <li><a href="#"><i class="fa-solid fa-pills"></i> Davolash Rejasi</a></li>
+                            <li><a href="#"><i class="fa-brands fa-telegram"></i> Telegram Bot</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="footer-links-column">
+                        <h4 data-i18n="footerCompany">Kompaniya</h4>
+                        <ul class="footer-links">
+                            <li><a href="#">Biz Haqimizda</a></li>
+                            <li><a href="#">Aloqa</a></li>
+                            <li><a href="#">Maxfiylik</a></li>
+                            <li><a href="#">Shartlar</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="footer-bottom">
+                    <p>&copy; 2025 Docassist. Barcha huquqlar himoyalangan.</p>
+                    <p><span class="credit">Foziljonov</span> tomonidan yaratilgan.</p>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Patient Database Modal -->
+    <div id="databaseModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-users"></i> Bemorlar Bazasi</h2>
+                <span class="close-modal" id="closeDatabaseModal">&times;</span>
+            </div>
+            <div class="modal-body" style="max-height: 400px; overflow-y: auto;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left;" id="patientsTable">
+                    <thead>
+                        <tr style="border-bottom: 2px solid var(--border);">
+                            <th data-i18n="idDate" style="padding: 10px;">ID / Sana</th>
+                            <th data-i18n="patientNameCol" style="padding: 10px;">Bemor Ismi</th>
+                            <th data-i18n="diagnosisCol" style="padding: 10px;">Tashxis (Grade)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="patientsTableBody">
+                        <!-- Filled dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-gear"></i> Sozlamalar</h2>
+                <span class="close-modal" id="closeSettingsModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label data-i18n="docSettingsTitle">Shifokor Ma'lumotlari:</label>
+                    <input type="text" id="docNameInput" class="form-control" placeholder="Dr. Ism Familiya" style="margin-bottom: 10px;">
+                    <input type="text" id="docSpecialtyInput" class="form-control" placeholder="Mutaxassislik (Masalan: Ortoped)">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="themeTitle">Mavzu (Theme):</label>
+                    <select id="themeSelect" class="form-control">
+                        <option value="light">Yorug' (Light)</option>
+                        <option value="dark">Qorong'u (Dark)</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-top: 20px;">
+                    <label data-i18n="langTitle">Til (Language):</label>
+                    <select id="languageSelect" class="form-control">
+                        <option value="uz">O'zbek tili</option>
+                        <option value="ru">Русский</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+                <button id="saveSettingsBtn" class="btn primary" style="width: 100%; justify-content: center; margin-top: 16px;" data-i18n="saveBtn">Saqlash</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js?v=12"></script>
+</body>
+</html>
