@@ -1,0 +1,5 @@
+*.pth
+*.db
+api/
+__pycache__/
+.env

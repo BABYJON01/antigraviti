@@ -7,3 +7,5 @@ node_modules/
 .vercel
 *.pth
 api/__pycache__/
+
+.vercel
